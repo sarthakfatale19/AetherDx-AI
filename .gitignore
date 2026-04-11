@@ -1,0 +1,37 @@
+# === Dependencies ===
+node_modules/
+backend/venv/
+frontend/.next/
+frontend/out/
+
+# === Environment & Secrets (CRITICAL — never commit) ===
+.env
+.env.local
+.env.production
+backend/.env
+
+# === Python ===
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# === OS Files ===
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# === IDE ===
+.vscode/
+.idea/
+*.sublime-*
+
+# === Logs ===
+*.log
+npm-debug.log*
+
+# === Build artifacts ===
+*.pkl

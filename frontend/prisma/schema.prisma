@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                    String        @id @default(uuid())
+  email                 String        @unique
+  passwordHash          String
+  role                  String        @default("PATIENT") // PATIENT, DOCTOR, ADMIN
+  
+  // Security & Lockout
+  failedLoginAttempts   Int           @default(0)
+  lockedUntil           DateTime?
+  
+  // MFA
+  mfaEnabled            Boolean       @default(false)
+  mfaSecret             String?       // Encrypted TOTP secret
+  mfaType               String        @default("TOTP") // TOTP, EMAIL_OTP
+  mfaBackupCodes        String?       // JSON string of hashed backup codes
+
+  // Relationships
+  sessions              Session[]
+  auditLogs             AuditLog[]
+  resetTokens           ResetToken[]
+  healthReports         HealthReport[]
+  symptomMetrics        SymptomMetric[]
+
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+}
+
+model HealthReport {
+  id                 String   @id @default(cuid())
+  userId             String
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type               String   // ASSESSMENT, PREDICTION, CHAT_DIAGNOSTIC
+  summary            String   // Primary prediction result e.g., "Diabetes Risk"
+  probability        Float?
+  riskTier           String?  // Healthy, Low, Moderate, High, Critical
+  
+  // The full assessment result object stored as JSON
+  fullPayload        String   
+  
+  createdAt          DateTime @default(now())
+}
+
+model SymptomMetric {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  symptomName  String   // e.g., "fatigue", "frequent_urination"
+  intensity    Float    // 0-10 scale
+  
+  timestamp    DateTime @default(now())
+}
+
+model Session {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Device & Security Tracking
+  token       String   @unique
+  deviceType  String?  // e.g., "MacOS Chrome"
+  ipAddress   String?
+  location    String?  // Approximate IP-based location
+  isRevoked   Boolean  @default(false)
+
+  lastActive  DateTime @default(now())
+  createdAt   DateTime @default(now())
+}
+
+model AuditLog {
+  id                 String   @id @default(cuid())
+  userId             String?
+  user               User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  action             String   // LOGIN_SUCCESS, LOGIN_FAILED, ACCOUNT_LOCKED, MFA_TRIGGERED
+  contextualMetadata String?  // Stored as JSON string
+  
+  ipAddress          String?
+  timestamp          DateTime @default(now())
+}
+
+model ResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
