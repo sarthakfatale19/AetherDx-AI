@@ -30,7 +30,7 @@ export interface Message {
   attachedFileType?: string;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_URL = ""; // Relative paths will use the current domain on Vercel
 
 export function useChat() {
   const [messages, setMessages] = useState<Message[]>([]);

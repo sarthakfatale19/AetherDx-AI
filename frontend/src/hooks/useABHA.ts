@@ -136,7 +136,7 @@ export interface ABHAState {
   syncing: boolean;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE = ""; // Relative paths for same-domain Vercel deployment
 
 export function useABHA() {
   const [state, setState] = useState<ABHAState>({
