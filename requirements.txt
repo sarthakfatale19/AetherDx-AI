@@ -8,3 +8,4 @@ google-generativeai
 groq
 pydantic
 pydantic-settings
+scikit-learn
