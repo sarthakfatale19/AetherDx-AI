@@ -1,10 +1,7 @@
 fastapi
 uvicorn
-xgboost
-shap
 pandas
 numpy
-scikit-learn
 python-multipart
 anthropic
 google-generativeai
