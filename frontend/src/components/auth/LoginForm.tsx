@@ -64,7 +64,7 @@ export default function LoginForm() {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:8000/api/auth/v1/patient/login/init", {
+      const response = await fetch("/api/auth/v1/patient/login/init", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         // Aligning with standard ABDM OTP flow expectations natively implemented inside Python backend
@@ -91,7 +91,7 @@ export default function LoginForm() {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:8000/api/auth/v1/patient/login/verify", {
+      const response = await fetch("/api/auth/v1/patient/login/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ transactionId: abhaTxnId, otp: abhaOtp }),

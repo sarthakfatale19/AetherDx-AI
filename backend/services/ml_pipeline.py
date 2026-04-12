@@ -131,6 +131,7 @@ class HealthMLPipeline:
         """Load persisted model if available."""
         if os.path.exists(MODEL_PATH):
             try:
+                print(f"🔍 Attempting to load model from: {MODEL_PATH}")
                 with open(MODEL_PATH, "rb") as f:
                     data = pickle.load(f)
                     self.models = data["models"]
@@ -149,10 +150,10 @@ class HealthMLPipeline:
                         self.primary_model_name = "RandomForest"
 
                     self.is_trained = True
-                    print(f"📦 Loaded pre-trained model from disk ({self.primary_model_name})")
+                    print(f"📦 Successfully loaded pre-trained model ({self.primary_model_name})")
                     return True
             except Exception as e:
-                print(f"⚠️ Failed to load model: {e} — will retrain")
+                print(f"⚠️ Failed to load model from {MODEL_PATH}: {e} — will retrain in-memory")
         return False
 
     def initialize(self):
