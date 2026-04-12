@@ -25,7 +25,10 @@ except Exception:
 
 from data.symptoms_data import generate_synthetic_dataset, DISEASE_LABELS, SYMPTOM_FEATURES
 
-MODEL_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "models", "health_model.pkl")
+# On Vercel serverless, the project dir is read-only; use /tmp for model cache
+_project_model = os.path.join(os.path.dirname(os.path.dirname(__file__)), "models", "health_model.pkl")
+_tmp_model = "/tmp/health_model.pkl"
+MODEL_PATH = _project_model if os.path.exists(_project_model) else _tmp_model
 
 
 class HealthMLPipeline:
@@ -108,14 +111,21 @@ class HealthMLPipeline:
         print(f"✨ ML Pipeline ready! Primary model: {self.primary_model_name}")
 
     def _save_model(self):
-        """Persist the trained pipeline."""
-        os.makedirs(os.path.dirname(MODEL_PATH), exist_ok=True)
-        with open(MODEL_PATH, "wb") as f:
-            pickle.dump({
-                "models": self.models,
-                "accuracy_scores": self.accuracy_scores,
-                "primary_model_name": self.primary_model_name,
-            }, f)
+        """Persist the trained pipeline (uses /tmp on serverless)."""
+        save_path = _tmp_model  # Always write to /tmp (works on serverless + local)
+        try:
+            os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        except OSError:
+            pass
+        try:
+            with open(save_path, "wb") as f:
+                pickle.dump({
+                    "models": self.models,
+                    "accuracy_scores": self.accuracy_scores,
+                    "primary_model_name": self.primary_model_name,
+                }, f)
+        except OSError as e:
+            print(f"⚠️ Could not persist model to disk: {e} (serverless, training in-memory only)")
 
     def _load_model(self) -> bool:
         """Load persisted model if available."""
